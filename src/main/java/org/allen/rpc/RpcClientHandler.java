@@ -1,29 +1,30 @@
 package org.allen.rpc;
 
-import java.io.ObjectInputStream;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.CharsetUtil;
+import io.netty.util.ReferenceCountUtil;
 
-/**
- * @author Zhou Zhengwen
- */
-public class RpcClientHandler implements InvocationHandler {
+public class RpcClientHandler extends ChannelInboundHandlerAdapter {
+
+    private Object returnResult = null;
+
+    public boolean hasResult = false;
+
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Socket socket = new Socket();
-        socket.connect(new InetSocketAddress("127.0.0.1", 8080));
-        OutputStream outputStream = socket.getOutputStream();
-        Class<?>[] interfaces = proxy.getClass().getInterfaces();
-        String interfaceName = interfaces[0].getName();
-        String implementClassName = interfaceName + "Impl";
-        String queryString = implementClassName + "?" + method.getName();
-        outputStream.write(queryString.getBytes());
-        outputStream.flush();
-        ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-        Object o = objectInputStream.readObject();
-        return o;
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        try {
+            ByteBuf buf = (ByteBuf) msg;
+            String rpcResult = buf.toString(CharsetUtil.UTF_8);
+            this.returnResult = rpcResult;
+            this.hasResult = true;
+        } finally {
+            ReferenceCountUtil.release(msg); //释放msg引用
+        }
+    }
+
+    public Object getReturnResult() {
+        return returnResult;
     }
 }

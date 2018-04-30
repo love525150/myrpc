@@ -7,6 +7,7 @@ import java.net.Socket;
 /**
  * @author Zhou Zhengwen
  */
+@Deprecated
 public class TestClient {
     public static void main(String[] args) throws Exception{
         Socket socket = new Socket();
@@ -14,8 +15,8 @@ public class TestClient {
         OutputStream outputStream = socket.getOutputStream();
         outputStream.write("org.allen.service.HelloServiceImpl?sayHello".getBytes());
         outputStream.flush();
-        ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+        /*ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
         Object o = objectInputStream.readObject();
-        System.out.println(o);
+        System.out.println(o);*/
     }
 }

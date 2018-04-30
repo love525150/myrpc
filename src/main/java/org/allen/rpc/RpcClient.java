@@ -9,7 +9,7 @@ import java.lang.reflect.Proxy;
  */
 public class RpcClient {
     public static void main(String[] args) {
-        Object o = Proxy.newProxyInstance(HelloService.class.getClassLoader(), new Class[]{HelloService.class}, new RpcClientHandler());
+        Object o = Proxy.newProxyInstance(HelloService.class.getClassLoader(), new Class[]{HelloService.class}, new RpcClientInvocationHandler());
         HelloService helloService = (HelloService) o;
         String s = helloService.sayHello();
         System.out.println(s);
