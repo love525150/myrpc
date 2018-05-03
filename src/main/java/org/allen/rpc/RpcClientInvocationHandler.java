@@ -40,8 +40,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
     private String getQueryString(Object proxy, Method method) {
         Class<?>[] interfaces = proxy.getClass().getInterfaces();
         String interfaceName = interfaces[0].getName();
-        String implementClassName = interfaceName + "Impl";
-        return implementClassName + "?" + method.getName();
+        return interfaceName + "?" + method.getName();
     }
 
     private Object invokeByNio(Object proxy, Method method) throws Throwable {
@@ -68,8 +67,12 @@ public class RpcClientInvocationHandler implements InvocationHandler {
 
             // Wait until the connection is closed.
             //channel.closeFuture().sync();
+            int sleepCount = 0;
             while (!rpcClientHandler.hasResult) {
-                Thread.sleep(50);
+                int sleepInterval = 50;
+                Thread.sleep(sleepInterval);
+                sleepCount++;
+                if (sleepCount * sleepInterval > 5000) throw new RuntimeException("rpc timeout");
             }
             returnResult = rpcClientHandler.getReturnResult();
             channel.close();

@@ -7,7 +7,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-
+@Deprecated
 public class NioTestClient {
     public static void main(String[] args) throws Exception {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -28,7 +28,7 @@ public class NioTestClient {
             // Start the client.
             ChannelFuture f = b.connect("127.0.0.1", 8080).sync(); // (5)
             Channel channel = f.channel();
-            channel.writeAndFlush(Unpooled.copiedBuffer("org.allen.service.HelloServiceImpl?sayHello".getBytes()));
+            channel.writeAndFlush(Unpooled.copiedBuffer("org.allen.service.HelloService?sayHello".getBytes()));
 
             // Wait until the connection is closed.
             //channel.closeFuture().sync();

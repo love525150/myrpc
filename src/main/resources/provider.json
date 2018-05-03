@@ -1,0 +1,8 @@
+{
+  "providers": [
+    {
+      "interface": "org.allen.service.HelloService",
+      "class": "org.allen.service.HelloServiceImpl"
+    }
+  ]
+}
