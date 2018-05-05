@@ -1,4 +1,15 @@
 package org.allen.dto;
 
-public class Greeting {
+import java.io.Serializable;
+
+public class Greeting implements Serializable {
+    private String word;
+
+    public String getWord() {
+        return word;
+    }
+
+    public void setWord(String word) {
+        this.word = word;
+    }
 }

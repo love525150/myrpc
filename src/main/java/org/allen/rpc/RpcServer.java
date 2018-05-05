@@ -27,8 +27,6 @@ import java.util.concurrent.Executors;
  * @author Zhou Zhengwen
  */
 public class RpcServer {
-    private static ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
 
     public void start() throws Exception{
         ProviderRegistry providerRegistry = registerProviders();

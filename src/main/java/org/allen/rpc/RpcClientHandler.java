@@ -3,8 +3,8 @@ package org.allen.rpc;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
+import org.allen.util.ObjectAndByteUtil;
 
 public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
@@ -16,7 +16,9 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
             ByteBuf buf = (ByteBuf) msg;
-            String rpcResult = buf.toString(CharsetUtil.UTF_8);
+            byte[] bytes = new byte[buf.readableBytes()];
+            buf.readBytes(bytes);
+            Object rpcResult = ObjectAndByteUtil.convertByteArrayToObject(bytes);
             this.returnResult = rpcResult;
             this.hasResult = true;
         } finally {

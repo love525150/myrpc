@@ -6,7 +6,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
 import org.allen.config.ProviderRegistry;
-import org.allen.util.MethodInvocationUtil;
 import org.allen.util.ObjectAndByteUtil;
 import org.allen.util.RpcUrlParseUtil;
 
@@ -31,9 +30,8 @@ public class RpcServerHandler extends ChannelInboundHandlerAdapter {
         Method method = providerClass.getMethod(methodName);
         Object returnObj = method.invoke(providerClass.getDeclaredConstructor().newInstance());
         System.out.println(returnObj);
-//        byte[] bytes = ObjectAndByteUtil.convertObjectToBytes(returnObj);
-        String str = (String) returnObj;
-        ctx.writeAndFlush(Unpooled.copiedBuffer(str.getBytes()));
+        byte[] returnBytes = ObjectAndByteUtil.convertObjectToByteArray(returnObj);
+        ctx.writeAndFlush(Unpooled.copiedBuffer(returnBytes));
     }
 
     @Override
