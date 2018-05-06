@@ -1,0 +1,7 @@
+{
+  "consumers": [
+    {
+      "interface": "org.allen.service.HelloService"
+    }
+  ]
+}

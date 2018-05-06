@@ -5,7 +5,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
-import org.allen.config.ProviderRegistry;
+import org.allen.config.RpcProviderRegistry;
 import org.allen.util.ObjectAndByteUtil;
 import org.allen.util.RpcUrlParseUtil;
 
@@ -14,10 +14,10 @@ import java.lang.reflect.Method;
 
 public class RpcServerHandler extends ChannelInboundHandlerAdapter {
 
-    private ProviderRegistry providerRegistry;
+    private RpcProviderRegistry rpcProviderRegistry;
 
-    public RpcServerHandler(ProviderRegistry providerRegistry) {
-        this.providerRegistry = providerRegistry;
+    public RpcServerHandler(RpcProviderRegistry rpcProviderRegistry) {
+        this.rpcProviderRegistry = rpcProviderRegistry;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class RpcServerHandler extends ChannelInboundHandlerAdapter {
         ByteBuf in = (ByteBuf) msg;
         String url = in.toString(CharsetUtil.UTF_8);
         String iName = RpcUrlParseUtil.parseInterfaceName(url);
-        Class<?> providerClass = providerRegistry.getProviderClass(iName);
+        Class<?> providerClass = rpcProviderRegistry.getProviderClass(iName);
         String methodName = RpcUrlParseUtil.parseMethodName(url);
         Method method = providerClass.getMethod(methodName);
         Object returnObj = method.invoke(providerClass.getDeclaredConstructor().newInstance());

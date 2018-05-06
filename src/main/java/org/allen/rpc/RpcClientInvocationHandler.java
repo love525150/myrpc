@@ -6,6 +6,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.allen.rpc.registry.ProviderLocation;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,11 +15,19 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.List;
 
 /**
  * @author Zhou Zhengwen
  */
 public class RpcClientInvocationHandler implements InvocationHandler {
+
+    private List<ProviderLocation> providerLocations;
+
+    public RpcClientInvocationHandler(List<ProviderLocation> providerLocations) {
+        this.providerLocations = providerLocations;
+    }
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         //Object o = invokeByBio(proxy, method);
@@ -60,7 +69,8 @@ public class RpcClientInvocationHandler implements InvocationHandler {
             });
 
             // Start the client.
-            ChannelFuture f = b.connect("127.0.0.1", 8080).sync(); // (5)
+            ProviderLocation providerLocation = providerLocations.iterator().next();
+            ChannelFuture f = b.connect(providerLocation.getAddr(), providerLocation.getPort()).sync(); // (5)
             Channel channel = f.channel();
             String queryString = getQueryString(proxy, method);
             channel.writeAndFlush(Unpooled.copiedBuffer(queryString.getBytes()));

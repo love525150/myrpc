@@ -12,7 +12,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.allen.config.JsonTest;
-import org.allen.config.ProviderRegistry;
+import org.allen.config.RpcProviderRegistry;
+import org.allen.rpc.registry.ZkProviderRegister;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,16 +21,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author Zhou Zhengwen
  */
 public class RpcServer {
 
+    public static final int RPC_PORT = 8080;
+
     public void start() throws Exception{
-        ProviderRegistry providerRegistry = registerProviders();
+        RpcProviderRegistry rpcProviderRegistry = registerProviders();
+
+        new ZkProviderRegister(rpcProviderRegistry, RPC_PORT).doRegister();
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -40,13 +43,13 @@ public class RpcServer {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(new RpcServerHandler(providerRegistry));
+                            socketChannel.pipeline().addLast(new RpcServerHandler(rpcProviderRegistry));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            ChannelFuture f = sb.bind(8080).sync();
+            ChannelFuture f = sb.bind(RPC_PORT).sync();
 
             f.channel().closeFuture().sync();
 
@@ -58,8 +61,8 @@ public class RpcServer {
         }
     }
 
-    private ProviderRegistry registerProviders() throws IOException, ClassNotFoundException {
-        InputStream inputStream = JsonTest.class.getClassLoader().getResourceAsStream("provider.json");
+    private RpcProviderRegistry registerProviders() throws IOException, ClassNotFoundException {
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("provider.json");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder stringBuilder = new StringBuilder();
         String line;
@@ -77,7 +80,7 @@ public class RpcServer {
             Class<?> cClass = Class.forName(className);
             providerMap.put(interfaceName, cClass);
         }
-        return new ProviderRegistry(providerMap);
+        return new RpcProviderRegistry(providerMap);
     }
 
     public static void main(String[] args) throws Exception{
