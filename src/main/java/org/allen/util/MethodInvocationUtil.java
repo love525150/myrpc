@@ -3,6 +3,7 @@ package org.allen.util;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+@Deprecated
 public class MethodInvocationUtil {
 
     public static Object invokeFromUrl(String content) {
