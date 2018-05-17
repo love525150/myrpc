@@ -15,5 +15,7 @@ public class RpcClient {
         HelloService helloService = (HelloService) rpcConsumerRegistry.getConsumer(HelloService.class);
         Greeting greeting = helloService.sayGreeting();
         System.out.println(greeting.getWord());
+        Greeting greeting2 = helloService.sayGreeting();
+        System.out.println(greeting2.getWord());
     }
 }

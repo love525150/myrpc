@@ -27,7 +27,11 @@ import java.util.Map;
  */
 public class RpcServer {
 
-    public static final int RPC_PORT = 8080;
+    private final int RPC_PORT;
+
+    public RpcServer(int RPC_PORT) {
+        this.RPC_PORT = RPC_PORT;
+    }
 
     public void start() throws Exception{
         RpcProviderRegistry rpcProviderRegistry = registerProviders();
@@ -83,7 +87,4 @@ public class RpcServer {
         return new RpcProviderRegistry(providerMap);
     }
 
-    public static void main(String[] args) throws Exception{
-        new RpcServer().start();
-    }
 }

@@ -24,6 +24,8 @@ public class RpcClientInvocationHandler implements InvocationHandler {
 
     private List<ProviderLocation> providerLocations;
 
+    private int roundRobinIndex = 0;
+
     public RpcClientInvocationHandler(List<ProviderLocation> providerLocations) {
         this.providerLocations = providerLocations;
     }
@@ -69,7 +71,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
             });
 
             // Start the client.
-            ProviderLocation providerLocation = providerLocations.iterator().next();
+            ProviderLocation providerLocation = roundRobin(providerLocations);
             ChannelFuture f = b.connect(providerLocation.getAddr(), providerLocation.getPort()).sync(); // (5)
             Channel channel = f.channel();
             String queryString = getQueryString(proxy, method);
@@ -90,5 +92,12 @@ public class RpcClientInvocationHandler implements InvocationHandler {
             workerGroup.shutdownGracefully();
         }
         return returnResult;
+    }
+
+    private ProviderLocation roundRobin(List<ProviderLocation> providerLocations) {
+        ProviderLocation providerLocation = providerLocations.get(roundRobinIndex);
+        roundRobinIndex++;
+        roundRobinIndex = roundRobinIndex % providerLocations.size();
+        return providerLocation;
     }
 }
