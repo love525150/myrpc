@@ -14,6 +14,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.allen.config.JsonTest;
 import org.allen.config.RpcProviderRegistry;
 import org.allen.rpc.registry.ZkProviderRegister;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.util.Map;
  * @author Zhou Zhengwen
  */
 public class RpcServer {
+    private static final Logger logger = LoggerFactory.getLogger(RpcServer.class);
 
     private final int RPC_PORT;
 
@@ -34,6 +37,7 @@ public class RpcServer {
     }
 
     public void start() throws Exception{
+        logger.info("starting server...");
         RpcProviderRegistry rpcProviderRegistry = registerProviders();
 
         new ZkProviderRegister(rpcProviderRegistry, RPC_PORT).doRegister();
@@ -66,6 +70,7 @@ public class RpcServer {
     }
 
     private RpcProviderRegistry registerProviders() throws IOException, ClassNotFoundException {
+        logger.info("reading provider config...");
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("provider.json");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder stringBuilder = new StringBuilder();
@@ -84,6 +89,7 @@ public class RpcServer {
             Class<?> cClass = Class.forName(className);
             providerMap.put(interfaceName, cClass);
         }
+        logger.info("finish config reading");
         return new RpcProviderRegistry(providerMap);
     }
 

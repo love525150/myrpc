@@ -1,16 +1,19 @@
 package org.allen.rpc.registry;
 
-import io.netty.util.internal.StringUtil;
 import org.allen.config.RpcProviderRegistry;
 import org.allen.util.IpUtil;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 public class ZkProviderRegister {
+    private static final Logger logger = LoggerFactory.getLogger(ZkProviderRegister.class);
+
     private RpcProviderRegistry rpcProviderRegistry;
 
     private int rpcPort;
@@ -20,6 +23,7 @@ public class ZkProviderRegister {
     public ZkProviderRegister(RpcProviderRegistry rpcProviderRegistry, int rpcPort) {
         this.rpcProviderRegistry = rpcProviderRegistry;
         this.rpcPort = rpcPort;
+        logger.info("creating zookeeper client...");
         client = CuratorFrameworkFactory.newClient("localhost:2181", new ExponentialBackoffRetry(1000, 3));
     }
 
@@ -27,6 +31,7 @@ public class ZkProviderRegister {
         SafeZkClient safeZkClient = new SafeZkClient(client);
         try {
             client.start();
+            logger.info("start zookeeper connection...");
             String rootPath = "/myrpc";
             safeZkClient.safeCreate(rootPath, CreateMode.PERSISTENT);
             Set<String> interfaceNames = rpcProviderRegistry.getAllInterfaceNames();
@@ -36,9 +41,11 @@ public class ZkProviderRegister {
                 String providerUrl = IpUtil.getLocalHostAddress() + ":" + rpcPort;
                 safeZkClient.safeCreate(providerPath, CreateMode.PERSISTENT);
                 safeZkClient.safeCreate(providerPath + "/" + providerUrl, CreateMode.EPHEMERAL);
+                logger.info("register {} to registry", interfaceName);
             }
+            logger.info("finish registration");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.debug("error in registering providers", e);
             client.close();
         }
     }
