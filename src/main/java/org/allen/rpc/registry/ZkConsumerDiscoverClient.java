@@ -7,11 +7,13 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ZkConsumerDiscover {
+@Deprecated
+//交给ProviderChangeListenerTask去处理了，启动的时候也会监听到节点变化
+public class ZkConsumerDiscoverClient {
     private CuratorFramework client;
 
-    public ZkConsumerDiscover() {
-        client = client = CuratorFrameworkFactory.newClient("localhost:2181", new ExponentialBackoffRetry(1000, 3));
+    public ZkConsumerDiscoverClient() {
+        client = CuratorFrameworkFactory.newClient("localhost:2181", new ExponentialBackoffRetry(1000, 3));
         client.start();
     }
 
@@ -27,5 +29,9 @@ public class ZkConsumerDiscover {
 
     public void closeZkClient() {
         client.close();
+    }
+
+    public CuratorFramework getZkClient() {
+        return client;
     }
 }
