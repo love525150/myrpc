@@ -34,19 +34,21 @@ public class ProviderChangeListenerTask implements Runnable {
             PathChildrenCache pathChildrenCache = new PathChildrenCache(client, "/myrpc/" + consumerInterface.getName() + "/providers", true);
             pathChildrenCache.getListenable().addListener((client, event) -> {
                 ChildData child = event.getData();
-                String path = child.getPath();
-                List<ProviderLocation> providerLocations = entry.getValue();
-                switch (event.getType()) {
-                    case CHILD_ADDED:
-                        logger.info("has listened a child node added: {}", path);
-                        ProviderLocation newAddedProviderLocation = ZkPathParseUtil.parseProviderPath(path);
-                        providerLocations.add(newAddedProviderLocation);
-                        break;
-                    case CHILD_REMOVED:
-                        logger.info("has listened a child node removed: {}", path);
-                        ProviderLocation removedProviderLocation = ZkPathParseUtil.parseProviderPath(path);
-                        providerLocations.removeIf(providerLocation -> providerLocation.equals(removedProviderLocation));
-                        break;
+                if (child != null) {
+                    String path = child.getPath();
+                    List<ProviderLocation> providerLocations = entry.getValue();
+                    switch (event.getType()) {
+                        case CHILD_ADDED:
+                            logger.info("has listened a child node added: {}", path);
+                            ProviderLocation newAddedProviderLocation = ZkPathParseUtil.parseProviderPath(path);
+                            providerLocations.add(newAddedProviderLocation);
+                            break;
+                        case CHILD_REMOVED:
+                            logger.info("has listened a child node removed: {}", path);
+                            ProviderLocation removedProviderLocation = ZkPathParseUtil.parseProviderPath(path);
+                            providerLocations.removeIf(providerLocation -> providerLocation.equals(removedProviderLocation));
+                            break;
+                    }
                 }
             });
             try {

@@ -29,6 +29,7 @@ public class RpcServerHandler extends ChannelInboundHandlerAdapter {
         String methodName = RpcUrlParseUtil.parseMethodName(url);
         Method method = providerClass.getMethod(methodName);
         Object returnObj = method.invoke(providerClass.getDeclaredConstructor().newInstance());
+        Thread.sleep(2000);
         System.out.println(returnObj);
         byte[] returnBytes = ObjectAndByteUtil.convertObjectToByteArray(returnObj);
         ctx.writeAndFlush(Unpooled.copiedBuffer(returnBytes));

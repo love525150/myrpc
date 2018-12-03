@@ -16,6 +16,10 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Zhou Zhengwen
@@ -56,7 +60,9 @@ public class RpcClientInvocationHandler implements InvocationHandler {
 
     private Object invokeByNio(Object proxy, Method method) throws Throwable {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        Object returnResult;
+        Object returnResult = null;
+        Lock lock = new ReentrantLock();
+        Condition condition = lock.newCondition();
         try {
             Bootstrap b = new Bootstrap(); // (1)
             RpcClientHandler rpcClientHandler = new RpcClientHandler();
@@ -79,16 +85,23 @@ public class RpcClientInvocationHandler implements InvocationHandler {
 
             // Wait until the connection is closed.
             //channel.closeFuture().sync();
-            int sleepCount = 0;
+            rpcClientHandler.acceptLock(lock);
+            rpcClientHandler.acceptCondition(condition);
+            lock.lock();
+            condition.await(5, TimeUnit.SECONDS);
+            /*int sleepCount = 0;
             while (!rpcClientHandler.hasResult) {
                 int sleepInterval = 50;
                 Thread.sleep(sleepInterval);
                 sleepCount++;
                 if (sleepCount * sleepInterval > 5000) throw new RuntimeException("rpc timeout");
-            }
+            }*/
             returnResult = rpcClientHandler.getReturnResult();
             channel.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
+            lock.unlock();
             workerGroup.shutdownGracefully();
         }
         return returnResult;
